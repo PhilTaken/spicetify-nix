@@ -1,4 +1,4 @@
-{ 
+{
   pkgs ? import <nixpkgs> {},
   theme ? "SpicetifyDefault",
   colorScheme ? "",
@@ -40,18 +40,24 @@ let
   spicetifyPkg = pkgs.callPackage ./spicetify.nix {};
   spicetify = "SPICETIFY_CONFIG=. ${spicetifyPkg}/spicetify";
 
-  themes = import ./themes-src.nix;
+  themes = pkgs.fetchFromGitHub {
+    owner = "morpheusthewhite";
+    repo = "spicetify-themes";
+    rev = "fdadc4c1cfe38ecd22cf828d2c825e0af1dcda9f";
+    sha256 = "1k44g8rmf8bh4kk16w4n9z1502ag3w67ad3jx28327ykq8pq5w29";
+    fetchSubmodules = true;
+  };
 
   # Dribblish is a theme which needs a couple extra settings
   isDribblish = theme == "Dribbblish";
-  
+
   extraCommands = (if isDribblish then "cp ./Themes/Dribbblish/dribbblish.js ./Extensions \n" else "")
     + (lineBreakConcat (makeLnCommands "Themes" thirdParyThemes))
     + (lineBreakConcat (makeLnCommands "Extensions" thirdParyExtensions))
     + (lineBreakConcat (makeLnCommands "CustomApps" thirdParyCustomApps));
 
   customAppsFixupCommands = lineBreakConcat (makeLnCommands "Apps" thirdParyCustomApps);
-  
+
   injectCssOrDribblish = boolToString (isDribblish || injectCss);
   replaceColorsOrDribblish = boolToString (isDribblish || replaceColors);
   overwriteAssetsOrDribblish = boolToString (isDribblish || overwriteAssets);
@@ -68,34 +74,34 @@ pkgs.spotify-unwrapped.overrideAttrs (oldAttrs: rec {
 
     find ${themes} -maxdepth 1 -type d -exec ln -s {} Themes \;
     ${extraCommands}
-    
+
     ${spicetify} config \
       spotify_path "$out/share/spotify" \
       prefs_path "$out/prefs" \
       current_theme ${theme} \
-      ${if 
+      ${if
           colorScheme != ""
-        then 
-          ''color_scheme "${colorScheme}" \'' 
-        else 
+        then
+          ''color_scheme "${colorScheme}" \''
+        else
           ''\'' }
-      ${if 
+      ${if
           extensionString != ""
-        then 
-          ''extensions "${extensionString}" \'' 
-        else 
+        then
+          ''extensions "${extensionString}" \''
+        else
           ''\'' }
       ${if
           customAppsString != ""
-        then 
-          ''custom_apps "${customAppsString}" \'' 
-        else 
+        then
+          ''custom_apps "${customAppsString}" \''
+        else
           ''\'' }
       ${if
           spotifyLaunchFlags != ""
-        then 
-          ''spotify_launch_flags "${spotifyLaunchFlags}" \'' 
-        else 
+        then
+          ''spotify_launch_flags "${spotifyLaunchFlags}" \''
+        else
           ''\'' }
       inject_css ${injectCssOrDribblish} \
       replace_colors ${replaceColorsOrDribblish} \

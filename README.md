@@ -1,3 +1,5 @@
+# TODO: update readme for this fork!
+
 # Spicetify-Nix
 
 Modifies Spotify using [spicetify-cli](https://github.com/khanhas/spicetify-cli).
