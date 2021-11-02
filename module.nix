@@ -1,5 +1,5 @@
 { lib, pkgs, config, ... }:
-with lib;                      
+with lib;
 let
   cfg = config.programs.spicetify;
 in {
@@ -69,45 +69,13 @@ in {
       type = types.bool;
       default = true;
     };
-    fastUserSwitching = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    visualizationHighFramerate = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    radio = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    songPage = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    experimentalFeatures = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    home = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    lyricAlwaysShow = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    lyricForceNoSync = mkOption {
-      type = types.bool;
-      default = false;
-    };
   };
 
   config = mkIf cfg.enable {
     home.packages = [
       (pkgs.callPackage ./package.nix {
         inherit pkgs;
-        inherit (cfg) 
+        inherit (cfg)
           theme
           colorScheme
           thirdParyThemes
@@ -124,14 +92,6 @@ in {
           removeRtlRule
           exposeApis
           disableUpgradeCheck
-          fastUserSwitching
-          visualizationHighFramerate
-          radio
-          songPage
-          experimentalFeatures
-          home
-          lyricAlwaysShow
-          lyricForceNoSync
         ;
       })
     ];
