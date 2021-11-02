@@ -1,29 +1,21 @@
-{
-  pkgs ? import <nixpkgs> {},
-  theme ? "SpicetifyDefault",
-  colorScheme ? "",
-  thirdParyThemes ? {},
-  thirdParyExtensions ? {},
-  thirdParyCustomApps ? {},
-  enabledExtensions ? [],
-  enabledCustomApps ? [],
-  spotifyLaunchFlags ? "",
-  injectCss ? false,
-  replaceColors ? false,
-  overwriteAssets ? false,
-  disableSentry ? true,
-  disableUiLogging ? true,
-  removeRtlRule ? true,
-  exposeApis ? true,
-  disableUpgradeCheck ? true,
-  fastUserSwitching ? false,
-  visualizationHighFramerate ? false,
-  radio ? false,
-  songPage ? false,
-  experimentalFeatures ? false,
-  home ? false,
-  lyricAlwaysShow ? false,
-  lyricForceNoSync ? false
+{ pkgs ? import <nixpkgs> {}
+, theme ? "SpicetifyDefault"
+, colorScheme ? ""
+, thirdParyThemes ? {}
+, thirdParyExtensions ? {}
+, thirdParyCustomApps ? {}
+, enabledExtensions ? []
+, enabledCustomApps ? []
+, spotifyLaunchFlags ? ""
+, injectCss ? false
+, replaceColors ? false
+, overwriteAssets ? false
+, disableSentry ? true
+, disableUiLogging ? true
+, removeRtlRule ? true
+, exposeApis ? true
+, disableUpgradeCheck ? true
+, ...
 }:
 
 let
@@ -43,8 +35,8 @@ let
   themes = pkgs.fetchFromGitHub {
     owner = "morpheusthewhite";
     repo = "spicetify-themes";
-    rev = "fdadc4c1cfe38ecd22cf828d2c825e0af1dcda9f";
-    sha256 = "1k44g8rmf8bh4kk16w4n9z1502ag3w67ad3jx28327ykq8pq5w29";
+    rev = "5046217e28084f7eaf69543f1f7c1b7c276496cc";
+    sha256 = "sha256-diKIBEbgru1iJ9JoU8HhRxj7ciuvc9IkSSXXqZP/iI0=";
     fetchSubmodules = true;
   };
 
@@ -71,6 +63,14 @@ pkgs.spotify-unwrapped.overrideAttrs (oldAttrs: rec {
     mkdir Themes
     mkdir Extensions
     mkdir CustomApps
+    mkdir -p $out/share/spotify/Apps/zlink/css/
+    touch $out/share/spotify/Apps/zlink/css/user.css
+
+    echo $out/share/spotify/Apps/zlink/css/user.css
+    ls $out/share/spotify/Apps/zlink/css/
+    ls $out/share/spotify/Apps/zlink/
+    ls $out/share/spotify/Apps/
+
 
     find ${themes} -maxdepth 1 -type d -exec ln -s {} Themes \;
     ${extraCommands}
@@ -110,15 +110,7 @@ pkgs.spotify-unwrapped.overrideAttrs (oldAttrs: rec {
       disable_ui_logging ${boolToString disableUiLogging } \
       remove_rtl_rule ${boolToString removeRtlRule } \
       expose_apis ${boolToString exposeApis } \
-      disable_upgrade_check ${boolToString disableUpgradeCheck } \
-      fastUser_switching ${boolToString fastUserSwitching } \
-      visualization_high_framerate ${boolToString visualizationHighFramerate } \
-      radio ${boolToString radio } \
-      song_page ${boolToString songPage } \
-      experimental_features ${boolToString experimentalFeatures } \
-      home ${boolToString home } \
-      lyric_always_show ${boolToString lyricAlwaysShow } \
-      lyric_force_no_sync ${boolToString lyricForceNoSync }
+      disable_upgrade_check ${boolToString disableUpgradeCheck }
 
     ${spicetify} backup apply
 
