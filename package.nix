@@ -1,5 +1,6 @@
-{ pkgs ? import <nixpkgs> {}
-, theme ? "SpicetifyDefault"
+{ pkgs
+, lib
+, theme ? "Default"
 , colorScheme ? ""
 , thirdParyThemes ? {}
 , thirdParyExtensions ? {}
@@ -15,6 +16,8 @@
 , removeRtlRule ? true
 , exposeApis ? true
 , disableUpgradeCheck ? true
+, spicetifyPackage ? pkgs.spicetify-cli
+, themesInput ? null
 , ...
 }:
 
@@ -22,23 +25,23 @@ let
   inherit (pkgs.lib.lists) foldr;
   inherit (pkgs.lib.attrsets) mapAttrsToList;
 
-  # Helper functions
-  pipeConcat = foldr (a: b: a + "|" + b) "";
-  lineBreakConcat = foldr (a: b: a + "\n" + b) "";
-  boolToString = x: if x then "1" else "0";
-  makeLnCommands = type: (mapAttrsToList (name: path: "ln -sf ${path} ./${type}/${name}"));
-
-  # Setup spicetify
-  spicetifyPkg = pkgs.callPackage ./spicetify.nix {};
-  spicetify = "SPICETIFY_CONFIG=. ${spicetifyPkg}/spicetify";
-
-  themes = pkgs.fetchFromGitHub {
+  # ----------------------------------------------------------
+  themes = if themesInput == null then pkgs.fetchFromGitHub {
     owner = "morpheusthewhite";
     repo = "spicetify-themes";
     rev = "5046217e28084f7eaf69543f1f7c1b7c276496cc";
     sha256 = "sha256-diKIBEbgru1iJ9JoU8HhRxj7ciuvc9IkSSXXqZP/iI0=";
     fetchSubmodules = true;
-  };
+  } else themesInput;
+
+  spicetify = "SPICETIFY_CONFIG=. ${spicetifyPackage}/bin/spicetify-cli";
+  # ----------------------------------------------------------
+
+  # Helper functions
+  pipeConcat = foldr (a: b: a + "|" + b) "";
+  lineBreakConcat = foldr (a: b: a + "\n" + b) "";
+  boolToString = x: if x then "1" else "0";
+  makeLnCommands = type: (mapAttrsToList (name: path: "ln -sf ${path} ./${type}/${name}"));
 
   # Dribblish is a theme which needs a couple extra settings
   isDribblish = theme == "Dribbblish";
@@ -54,25 +57,19 @@ let
   replaceColorsOrDribblish = boolToString (isDribblish || replaceColors);
   overwriteAssetsOrDribblish = boolToString (isDribblish || overwriteAssets);
 
-  extensionString = pipeConcat ((if isDribblish then [ "dribbblish.js" ] else []) ++ enabledExtensions);
+  extensionString = pipeConcat ((lib.optionals isDribblish [ "dribbblish.js" ]) ++ enabledExtensions);
   customAppsString = pipeConcat enabledCustomApps;
 in
 pkgs.spotify-unwrapped.overrideAttrs (oldAttrs: rec {
+  name = "spotify";
+
   postInstall=''
     touch $out/prefs
-    mkdir Themes
-    mkdir Extensions
-    mkdir CustomApps
-    mkdir -p $out/share/spotify/Apps/zlink/css/
-    touch $out/share/spotify/Apps/zlink/css/user.css
-
-    echo $out/share/spotify/Apps/zlink/css/user.css
-    ls $out/share/spotify/Apps/zlink/css/
-    ls $out/share/spotify/Apps/zlink/
-    ls $out/share/spotify/Apps/
-
+    mkdir Themes Extensions CustomApps
 
     find ${themes} -maxdepth 1 -type d -exec ln -s {} Themes \;
+    ls -lasi Themes
+
     ${extraCommands}
 
     ${spicetify} config \

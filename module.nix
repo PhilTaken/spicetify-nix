@@ -1,3 +1,4 @@
+{ themes ? null}:
 { lib, pkgs, config, ... }:
 with lib;
 let
@@ -7,7 +8,7 @@ in {
     enable = mkEnableOption "A modded Spotify";
     theme = mkOption {
       type = types.str;
-      default = "SpicetifyDefault";
+      default = "Default";
     };
     colorScheme = mkOption {
       type = types.str;
@@ -93,6 +94,7 @@ in {
           exposeApis
           disableUpgradeCheck
         ;
+        themesInput = themes;
       })
     ];
   };
